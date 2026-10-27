@@ -1,0 +1,760 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#8e2233">
+<title>Shaadi Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ================= Theme tokens ================= */
+:root{
+  --text:#33231f; --muted:#93796f;
+  --accent:#8e2233; --a1:#8e2233; --a2:#c05162; --on-accent:#fff;
+  --gold:#c9992f; --gold-2:#e6c06a;
+  --glass:rgba(255,253,247,.6); --glass-border:rgba(255,255,255,.7);
+  --glass-strong:rgba(255,253,247,.82);
+  --input-bg:rgba(255,253,247,.7);
+  --ok:#25704a; --ok-bg:rgba(120,200,150,.25); --ok-border:rgba(37,112,74,.35);
+  --warn:#a4690c; --warn-bg:rgba(240,190,90,.28); --warn-border:rgba(164,105,12,.35);
+  --bad:#c02828; --bad-bg:rgba(240,110,110,.22); --bad-border:rgba(192,40,40,.35);
+  --shadow:0 4px 18px rgba(120,60,40,.12),0 1px 3px rgba(120,60,40,.08);
+  --glow:0 10px 30px rgba(142,34,51,.35);
+  --hero-grad:linear-gradient(135deg,#6b1220 0%,#8e2233 45%,#b84a5a 100%);
+  --header-grad:linear-gradient(135deg,rgba(107,18,32,.92),rgba(142,34,51,.88) 55%,rgba(184,74,90,.9));
+  --blob-opacity:1;
+}
+[data-theme="dark"]{
+  --text:#f3e7db; --muted:#b3a096;
+  --accent:#f0b8c0; --a1:#e8aeb8; --a2:#d4899a; --on-accent:#33161d;
+  --gold:#e0b45e; --gold-2:#e8c06a;
+  --glass:rgba(40,30,36,.5); --glass-border:rgba(255,255,255,.1);
+  --glass-strong:rgba(30,22,27,.88);
+  --input-bg:rgba(255,255,255,.06);
+  --ok:#7fd1a0; --ok-bg:rgba(90,200,140,.14); --ok-border:rgba(127,209,160,.3);
+  --warn:#e8ba60; --warn-bg:rgba(230,180,90,.14); --warn-border:rgba(232,186,96,.3);
+  --bad:#ff9a9a; --bad-bg:rgba(255,130,130,.13); --bad-border:rgba(255,154,154,.3);
+  --shadow:0 4px 18px rgba(0,0,0,.4),0 1px 3px rgba(0,0,0,.3);
+  --glow:0 10px 30px rgba(0,0,0,.5);
+  --blob-opacity:.55;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{font-family:'Poppins',system-ui,sans-serif;color:var(--text);font-size:15px;overflow:hidden}
+
+/* Aurora color blobs behind everything — this is what the glass blurs */
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;opacity:var(--blob-opacity);
+  background:
+    radial-gradient(55% 45% at 12% 8%,  rgba(240,170,185,.9), transparent 62%),
+    radial-gradient(50% 42% at 88% 12%, rgba(238,205,130,.9), transparent 62%),
+    radial-gradient(60% 50% at 85% 92%, rgba(200,120,110,.85), transparent 62%),
+    radial-gradient(48% 42% at 8% 88%,  rgba(235,185,200,.85), transparent 62%),
+    linear-gradient(160deg,#faf1e0,#f5e6d8);
+}
+/* dark-mode attribute lives on <html>, so target it on the element itself */
+html[data-theme="dark"] body::before{
+  background:
+    radial-gradient(55% 45% at 12% 8%,  rgba(142,34,51,.75), transparent 62%),
+    radial-gradient(50% 42% at 88% 12%, rgba(120,85,25,.5), transparent 62%),
+    radial-gradient(60% 50% at 85% 92%, rgba(90,25,45,.65), transparent 62%),
+    radial-gradient(48% 42% at 8% 88%,  rgba(70,30,55,.65), transparent 62%),
+    linear-gradient(160deg,#16101a,#1d1319);
+}
+
+/* ================= App shell (max 480px, centered, frosted canvas) ================= */
+#app{max-width:480px;margin:0 auto;height:100%;display:flex;flex-direction:column;position:relative;z-index:1;
+  background:rgba(250,244,232,.45);
+  -webkit-backdrop-filter:blur(60px) saturate(1.25);backdrop-filter:blur(60px) saturate(1.25);
+  box-shadow:0 0 60px rgba(60,20,30,.25);border-left:1px solid var(--glass-border);border-right:1px solid var(--glass-border)}
+[data-theme="dark"] #app{background:rgba(22,15,20,.45)}
+
+/* Header: glassy maroon gradient */
+header{background:var(--header-grad);color:#fff;padding:16px 16px 18px;border-radius:0 0 26px 26px;position:relative;z-index:2;
+  -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,.18);box-shadow:var(--glow)}
+[data-theme="dark"] header{color:#f6e8e0}
+header .hrow{display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:19px;margin:0;font-weight:700;letter-spacing:.2px;text-shadow:0 1px 8px rgba(0,0,0,.25)}
+header h1 span{background:linear-gradient(135deg,#f3d488,#e0b45e);-webkit-background-clip:text;background-clip:text;color:transparent}
+header .sub{font-size:11.5px;opacity:.85;margin:2px 0 0}
+.hbtns{display:flex;gap:8px}
+.hbtns .icon-btn{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);border-radius:13px;color:#fff;min-width:42px;min-height:42px;font-size:17px;transition:transform .12s}
+.hbtns .icon-btn:active{transform:scale(.92)}
+[data-theme="dark"] .hbtns .icon-btn{color:#f6e8e0;background:rgba(255,255,255,.08)}
+
+main{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-bottom:20px}
+section{display:none;animation:fade .2s ease}
+section.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* ================= Shared controls ================= */
+button{font-family:inherit;cursor:pointer;border:0;color:inherit}
+input,select{font-family:inherit;font-size:15px;color:var(--text);background:var(--input-bg);border:1.5px solid var(--glass-border);border-radius:14px;min-height:46px;padding:0 14px;width:100%;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:outline .15s,box-shadow .15s}
+input::placeholder{color:var(--muted);opacity:.8}
+input:focus,select:focus{outline:2px solid var(--gold-2);outline-offset:1px;box-shadow:0 0 0 4px rgba(230,192,106,.18)}
+.btn{min-height:50px;padding:0 20px;border-radius:14px;background:linear-gradient(135deg,var(--a1),var(--a2));color:var(--on-accent);font-weight:600;font-size:15.5px;
+  box-shadow:0 6px 16px rgba(142,34,51,.3);transition:transform .1s,box-shadow .15s}
+.btn:active{transform:scale(.96);box-shadow:0 2px 8px rgba(142,34,51,.3)}
+.btn.ghost{background:var(--glass);border:1px solid var(--glass-border);color:var(--accent);box-shadow:none}
+.btn.danger{background:var(--bad-bg);color:var(--bad);box-shadow:none}
+.stepper{display:flex;align-items:center;background:var(--input-bg);border:1.5px solid var(--glass-border);border-radius:14px;overflow:hidden;flex-shrink:0}
+.stepper button{width:44px;height:46px;background:transparent;font-size:20px;font-weight:600;color:var(--accent)}
+.stepper .n{min-width:30px;text-align:center;font-weight:600}
+
+/* ================= Guests: quick add (frosted sticky bar) ================= */
+.quick{position:sticky;top:0;z-index:5;padding:12px 14px 10px;display:grid;gap:8px;
+  background:rgba(250,244,232,.55);-webkit-backdrop-filter:blur(24px) saturate(1.3);backdrop-filter:blur(24px) saturate(1.3);
+  border-bottom:1px solid var(--glass-border)}
+[data-theme="dark"] .quick{background:rgba(22,15,20,.55)}
+.quick .row{display:flex;gap:8px}
+.quick .btn{flex:1;min-height:52px;font-size:16px;border-radius:14px}
+
+/* Summary strip: glass pills */
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 14px 0}
+.stat{background:var(--glass);border:1px solid var(--glass-border);border-radius:18px;padding:12px 8px;text-align:center;box-shadow:var(--shadow);
+  -webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3)}
+.stat b{display:block;font-size:20px;line-height:1.2;
+  background:linear-gradient(135deg,var(--accent),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat small{color:var(--muted);font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;font-weight:500}
+
+/* Filters: search + status pills */
+.filters{padding:12px 14px 4px;display:grid;gap:8px}
+.pills{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill-btn{flex-shrink:0;min-height:40px;padding:0 16px;border-radius:20px;background:var(--glass);border:1.5px solid var(--glass-border);font-weight:500;font-size:13px;color:var(--muted);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:all .15s}
+.pill-btn.on{background:linear-gradient(135deg,var(--a1),var(--a2));border-color:transparent;color:var(--on-accent);box-shadow:0 4px 12px rgba(142,34,51,.3)}
+
+/* ================= Compact guest list (glass rows) ================= */
+.list{padding:10px 14px;display:grid;gap:8px}
+.swipe{position:relative;border-radius:18px;overflow:hidden;background:linear-gradient(135deg,#c02828,#a01f1f)}
+.swipe::after{content:"Delete";position:absolute;right:18px;top:50%;transform:translateY(-50%);color:#fff;font-weight:600;font-size:13px}
+.grow-item{background:var(--glass);border:1px solid var(--glass-border);border-radius:18px;box-shadow:var(--shadow);
+  -webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);
+  display:flex;align-items:center;gap:10px;padding:10px 12px;position:relative;z-index:1;transition:transform .2s;touch-action:pan-y}
+.grow-item:active{background:var(--glass-strong)}
+.grow-item.dragging{transition:none}
+.avatar{width:42px;height:42px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-weight:700;font-size:16px;text-transform:uppercase;
+  background:linear-gradient(135deg,rgba(142,34,51,.14),rgba(201,153,47,.2));color:var(--accent);border:1.5px solid var(--glass-border)}
+.gmeta{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.gmeta b{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gmeta small{color:var(--muted);font-size:12px}
+.chip{min-height:36px;padding:0 12px;border-radius:18px;font-weight:600;font-size:12px;flex-shrink:0;border:1px solid transparent;transition:transform .1s}
+.chip:active{transform:scale(.94)}
+.chip.Invited{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-border)}
+.chip.Confirmed{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-border)}
+.chip.Declined{background:var(--bad-bg);color:var(--bad);border-color:var(--bad-border)}
+.chev{color:var(--muted);font-size:18px;flex-shrink:0;opacity:.6}
+
+/* ================= Bottom sheet dialog (heavy frost) ================= */
+.overlay{position:fixed;inset:0;background:rgba(40,15,20,.4);z-index:50;display:none;align-items:flex-end;justify-content:center;
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.overlay.open{display:flex}
+.sheet{width:100%;max-width:480px;border-radius:26px 26px 0 0;padding:8px 18px calc(18px + env(safe-area-inset-bottom));
+  background:var(--glass-strong);-webkit-backdrop-filter:blur(30px) saturate(1.4);backdrop-filter:blur(30px) saturate(1.4);
+  border-top:1px solid var(--glass-border);box-shadow:0 -12px 40px rgba(40,10,20,.3);
+  animation:up .28s cubic-bezier(.2,.9,.3,1)}
+@keyframes up{from{transform:translateY(50px);opacity:.5}to{transform:none;opacity:1}}
+.grab{width:42px;height:5px;border-radius:3px;background:var(--muted);opacity:.4;margin:6px auto 12px}
+.sheet h2{margin:0 0 12px;font-size:17px;font-weight:600}
+.sheet .field{margin-bottom:12px}
+.flabel{font-size:11.5px;color:var(--muted);margin:0 0 5px 2px;display:block;text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button{min-height:46px;border-radius:13px;background:var(--input-bg);border:1.5px solid var(--glass-border);font-weight:600;font-size:13px;color:var(--muted);transition:all .15s}
+.seg button.on.Invited{background:var(--warn-bg);border-color:var(--warn);color:var(--warn)}
+.seg button.on.Confirmed{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.seg button.on.Declined{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.count-row{display:flex;align-items:center;justify-content:space-between;background:var(--input-bg);border:1.5px solid var(--glass-border);border-radius:14px;padding:4px 6px 4px 14px}
+.count-row span{font-size:14px;font-weight:500}
+.sheet .actions{display:grid;grid-template-columns:48px 1fr 1fr;gap:8px;margin-top:16px}
+.sheet .actions .btn{min-height:52px;padding:0}
+.sheet .delbtn{border-radius:14px;background:var(--bad-bg);border:1px solid var(--bad-border);color:var(--bad);font-size:18px;min-height:52px}
+
+/* ================= Budget ================= */
+.pad{padding:12px 14px}
+.hero{margin:12px 14px 0;background:var(--hero-grad);color:#fff;border-radius:22px;padding:18px;position:relative;overflow:hidden;
+  box-shadow:var(--glow);border:1px solid rgba(255,255,255,.15)}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(60% 80% at 85% 0%,rgba(243,212,136,.28),transparent 60%),radial-gradient(50% 60% at 0% 100%,rgba(255,255,255,.08),transparent 60%)}
+.hero>*{position:relative}
+.hero .top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.hero small{opacity:.85;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.hero .big{font-size:28px;font-weight:700;line-height:1.15;text-shadow:0 2px 10px rgba(0,0,0,.25)}
+.hero .big.neg{color:#ffb4b4}
+.hero .cols{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.hero .cols div small{display:block}
+.hero .cols div b{font-size:15px}
+.bar{height:10px;border-radius:5px;background:rgba(255,255,255,.22);overflow:hidden;margin-top:12px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#f3d488,#e0b45e);border-radius:5px;box-shadow:0 0 8px rgba(243,212,136,.6);transition:width .3s}
+.bar i.over{background:#ff9d9d;box-shadow:0 0 8px rgba(255,157,157,.6)}
+.hero .cap{font-size:11px;opacity:.85;margin:6px 0 0}
+.budget-set{display:flex;gap:8px;align-items:center}
+.budget-set input{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);color:#fff;min-height:40px;font-size:14px}
+.budget-set input::placeholder{color:rgba(255,255,255,.65)}
+.budget-set input:focus{outline-color:var(--gold-2)}
+.box{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;padding:14px;box-shadow:var(--shadow);margin:12px 14px 0;
+  -webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3)}
+.h2{font-size:13px;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:.5px;
+  background:linear-gradient(135deg,var(--accent),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cat-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px dashed var(--glass-border);font-size:14px;gap:8px}
+.cat-row:last-child{border:0}
+.cat-row .cb{height:6px;border-radius:3px;background:rgba(142,34,51,.12);flex:1;overflow:hidden;max-width:120px}
+[data-theme="dark"] .cat-row .cb{background:rgba(255,255,255,.1)}
+.cat-row .cb i{display:block;height:100%;background:linear-gradient(90deg,var(--gold-2),var(--gold));border-radius:3px}
+.cat-row span:last-child{font-weight:600;white-space:nowrap}
+.form{display:grid;gap:8px}
+.form .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.toggle{display:grid;grid-template-columns:1fr 1fr;background:var(--input-bg);border-radius:14px;padding:3px;border:1.5px solid var(--glass-border)}
+.toggle button{min-height:44px;border-radius:11px;background:transparent;font-weight:600;color:var(--muted);font-size:13.5px;transition:all .15s}
+.toggle button.on.Paid{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-border)}
+.toggle button.on.Pending{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-border)}
+
+/* Compact expense rows */
+.erow{background:var(--glass);border:1px solid var(--glass-border);border-radius:18px;box-shadow:var(--shadow);
+  -webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);
+  padding:10px 12px;display:flex;align-items:center;gap:10px}
+.eic{width:38px;height:38px;border-radius:13px;flex-shrink:0;display:grid;place-items:center;font-size:17px;
+  background:linear-gradient(135deg,rgba(142,34,51,.12),rgba(201,153,47,.18));border:1px solid var(--glass-border)}
+.emeta{flex:1;min-width:0}
+.emeta b{display:block;font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.emeta small{color:var(--muted);font-size:12px}
+.eamt{font-weight:700;font-size:14.5px;white-space:nowrap}
+.eactions{display:flex;gap:2px}
+.eactions .icon-btn{min-width:38px;min-height:38px;font-size:15px;border-radius:10px}
+.eactions .icon-btn:active{background:var(--glass-strong)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
+.dot.Paid{background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.dot.Pending{background:var(--warn);box-shadow:0 0 6px var(--warn)}
+
+/* ================= Empty / toast / nav ================= */
+.empty{text-align:center;color:var(--muted);padding:36px 16px}
+.empty .em{font-size:42px;display:block;margin-bottom:8px;filter:drop-shadow(0 4px 8px rgba(142,34,51,.25))}
+.empty b{display:block;color:var(--text);font-size:15.5px;margin-bottom:2px}
+.empty small{font-size:13px}
+#toast{position:absolute;left:14px;right:14px;bottom:84px;background:rgba(35,22,20,.9);color:#fff;border-radius:16px;padding:6px 6px 6px 16px;display:none;align-items:center;justify-content:space-between;z-index:60;font-size:13.5px;
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.12);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+#toast.show{display:flex;animation:up .2s ease}
+#toast button{background:transparent;color:var(--gold-2);font-weight:600;min-height:42px;padding:0 14px}
+nav{display:grid;grid-template-columns:1fr 1fr;position:relative;
+  background:rgba(250,244,232,.6);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);
+  border-top:1px solid var(--glass-border);padding-bottom:env(safe-area-inset-bottom)}
+[data-theme="dark"] nav{background:rgba(22,15,20,.6)}
+nav button{min-height:62px;background:transparent;font-size:11.5px;font-weight:500;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative;transition:color .15s}
+nav button .ic{font-size:21px;transition:transform .15s}
+nav button.active{color:var(--accent);font-weight:600}
+nav button.active .ic{transform:translateY(-2px) scale(1.15);filter:drop-shadow(0 3px 6px rgba(142,34,51,.35))}
+nav button.active::before{content:"";position:absolute;top:0;width:34px;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,var(--gold-2),var(--gold))}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="hrow">
+      <div>
+        <h1>💍 Shaadi <span>Planner</span></h1>
+        <p class="sub">Groom side · guests &amp; budget</p>
+      </div>
+      <div class="hbtns">
+        <button class="icon-btn" id="exportBtn" title="Export guest list (CSV)" aria-label="Export guest list">⬇</button>
+        <button class="icon-btn" id="themeBtn" title="Dark mode" aria-label="Toggle dark mode">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ================= GUESTS TAB ================= -->
+    <section id="tab-guests" class="active">
+      <form class="quick" id="quickForm" autocomplete="off">
+        <input id="qName" placeholder="Guest ka naam likho…" aria-label="Guest name" maxlength="60" enterkeyhint="done">
+        <div class="row">
+          <div class="stepper" aria-label="Family count">
+            <button type="button" id="qMinus" aria-label="Kam karo">−</button>
+            <span class="n" id="qCount">1</span>
+            <button type="button" id="qPlus" aria-label="Badhao">+</button>
+          </div>
+          <button class="btn" type="submit">+ Add Guest</button>
+        </div>
+      </form>
+
+      <div class="summary" id="gSummary"></div>
+
+      <div class="filters">
+        <input id="gSearch" type="search" placeholder="🔍 Naam se dhundo" aria-label="Search guests">
+        <div class="pills" id="gPills">
+          <button class="pill-btn on" data-st="">Sab</button>
+          <button class="pill-btn" data-st="Invited">Invited</button>
+          <button class="pill-btn" data-st="Confirmed">Confirmed</button>
+          <button class="pill-btn" data-st="Declined">Declined</button>
+        </div>
+      </div>
+
+      <div class="list" id="gList"></div>
+    </section>
+
+    <!-- ================= BUDGET TAB ================= -->
+    <section id="tab-budget">
+      <div class="hero" id="bHero"></div>
+      <div class="box" id="bCats"></div>
+
+      <form class="box form" id="expForm" autocomplete="off">
+        <h3 class="h2" id="expTitle">Naya Expense</h3>
+        <input id="eName" placeholder="Item (e.g. Sherwani, DJ)" maxlength="60" aria-label="Item name">
+        <div class="two">
+          <select id="eCat" aria-label="Category"></select>
+          <input id="eAmt" inputmode="numeric" placeholder="Amount ₹" aria-label="Amount">
+        </div>
+        <div class="toggle" id="eStatus">
+          <button type="button" data-v="Paid">✔ Paid</button>
+          <button type="button" data-v="Pending" class="on Pending">⏳ Pending</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" type="submit" style="flex:1" id="eSubmit">+ Add Expense</button>
+          <button class="btn ghost" type="button" id="eCancel" style="display:none">Cancel</button>
+        </div>
+      </form>
+
+      <div class="pad" style="padding-bottom:0">
+        <div class="pills" id="ePills">
+          <button class="pill-btn on" data-v="">Sab</button>
+          <button class="pill-btn" data-v="Paid">Paid</button>
+          <button class="pill-btn" data-v="Pending">Pending</button>
+        </div>
+      </div>
+      <div class="list" id="eList"></div>
+    </section>
+  </main>
+
+  <!-- Guest edit bottom-sheet dialog -->
+  <div class="overlay" id="dlg">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+      <div class="grab"></div>
+      <h2 id="dlgTitle">Guest Edit Karo</h2>
+      <div class="field">
+        <label class="flabel" for="dName">Naam</label>
+        <input id="dName" maxlength="60">
+      </div>
+      <div class="field">
+        <label class="flabel">Family members</label>
+        <div class="count-row">
+          <span id="dCountLabel">1 member</span>
+          <div class="stepper">
+            <button id="dMinus" aria-label="Kam karo">−</button>
+            <span class="n" id="dCount">1</span>
+            <button id="dPlus" aria-label="Badhao">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="flabel">Status</label>
+        <div class="seg" id="dSeg">
+          <button data-st="Invited">Invited</button>
+          <button data-st="Confirmed">Confirmed</button>
+          <button data-st="Declined">Declined</button>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="delbtn" id="dDelete" aria-label="Delete guest">🗑</button>
+        <button class="btn ghost" id="dCancel">Cancel</button>
+        <button class="btn" id="dSave">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" role="status"><span id="toastMsg"></span><button id="toastUndo">Undo</button></div>
+
+  <nav>
+    <button data-tab="guests" class="active"><span class="ic">👥</span>Guests</button>
+    <button data-tab="budget"><span class="ic">💰</span>Budget</button>
+  </nav>
+</div>
+
+<script>
+/* =====================================================
+   Shaadi Planner — vanilla JS, no backend.
+   All data persists in localStorage under one key.
+   ===================================================== */
+const KEY = 'shaadi-planner-v1';
+const CATEGORIES = ['Venue','Catering','Decor','Clothes','Photography','Travel','Other'];
+const CAT_ICONS = {Venue:'🏛',Catering:'🍽',Decor:'🌸',Clothes:'👗',Photography:'📸',Travel:'🚗',Other:'📦'};
+const STATUSES = ['Invited','Confirmed','Declined'];      // tap-to-cycle order
+const SIDE_ONLY = 'Groom';   // list is Groom-side only; change to 'Bride' to switch
+const $ = (id) => document.getElementById(id);
+
+/* ---------- State + persistence ---------- */
+const defaults = { guests:[], expenses:[], budget:0, theme:'light', tab:'guests' };
+let S = Object.assign({}, defaults, load());
+function load(){
+  try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; }
+}
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) { toast('Save nahi ho paya (storage full?)'); }
+}
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+
+/* ---------- Helpers ---------- */
+const inr = new Intl.NumberFormat('en-IN');                // 150000 -> 1,50,000
+const money = (n) => '₹' + inr.format(Math.round(n || 0));
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = (v) => parseInt(String(v).replace(/[^\d]/g,''),10) || 0;   // "1,50,000" -> 150000
+const clamp = (n) => Math.max(1, Math.min(99, n));
+
+/* Toast with Undo (used after deletes) */
+let toastTimer, undoFn = null;
+function toast(msg, undo){
+  $('toastMsg').textContent = msg;
+  undoFn = undo || null;
+  $('toastUndo').style.display = undo ? '' : 'none';
+  $('toast').classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => $('toast').classList.remove('show'), 4000);
+}
+$('toastUndo').onclick = () => { if (undoFn) undoFn(); $('toast').classList.remove('show'); };
+
+/* ---------- Theme + tabs ---------- */
+function applyTheme(){
+  document.documentElement.dataset.theme = S.theme;
+  $('themeBtn').textContent = S.theme === 'dark' ? '☀️' : '🌙';
+}
+$('themeBtn').onclick = () => { S.theme = S.theme === 'dark' ? 'light' : 'dark'; save(); applyTheme(); };
+
+function showTab(t){
+  S.tab = t; save();
+  document.querySelectorAll('section').forEach(s => s.classList.toggle('active', s.id === 'tab-' + t));
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+  $('exportBtn').style.visibility = t === 'guests' ? 'visible' : 'hidden';
+  $('main').scrollTop = 0;
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+
+/* =====================================================
+   GUESTS
+   ===================================================== */
+let qCount = 1;
+
+$('qMinus').onclick = () => { qCount = clamp(qCount - 1); $('qCount').textContent = qCount; };
+$('qPlus').onclick  = () => { qCount = clamp(qCount + 1); $('qCount').textContent = qCount; };
+
+// Submit fires on Enter key too. Name field refocuses so you can keep typing.
+$('quickForm').onsubmit = (e) => {
+  e.preventDefault();
+  const name = $('qName').value.trim();
+  if (!name) { $('qName').focus(); return; }
+  S.guests.unshift({ id: uid(), name, count: qCount, side: SIDE_ONLY, status: 'Invited' });
+  save();
+  $('qName').value = '';
+  qCount = 1; $('qCount').textContent = 1;
+  renderGuests();
+  $('qName').focus();
+};
+
+$('gSearch').addEventListener('input', renderGuests);
+$('gPills').addEventListener('click', (e) => {
+  const b = e.target.closest('.pill-btn'); if (!b) return;
+  $('gPills').querySelectorAll('.pill-btn').forEach(p => p.classList.toggle('on', p === b));
+  renderGuests();
+});
+const gFilterStatus = () => $('gPills').querySelector('.pill-btn.on').dataset.st;
+
+function renderGuests(){
+  const g = S.guests.filter(x => x.side === SIDE_ONLY);   // only Groom side is shown/counted
+  const people = g.reduce((a, x) => a + x.count, 0);
+  const conf = g.filter(x => x.status === 'Confirmed').reduce((a, x) => a + x.count, 0);
+  $('gSummary').innerHTML =
+    `<div class="stat"><b>${g.length}</b><small>Families</small></div>
+     <div class="stat"><b>${people}</b><small>People</small></div>
+     <div class="stat"><b>${conf}</b><small>Confirmed</small></div>`;
+
+  const q = $('gSearch').value.trim().toLowerCase(), st = gFilterStatus();
+  const rows = g.filter(x => (!q || x.name.toLowerCase().includes(q)) && (!st || x.status === st));
+
+  if (!g.length) {
+    $('gList').innerHTML = `<div class="empty"><span class="em">💌</span><b>Pehla guest add karo</b><small>Upar naam likho aur Add dabao.</small></div>`;
+    return;
+  }
+  if (!rows.length) {
+    $('gList').innerHTML = `<div class="empty"><span class="em">🔍</span><b>Koi match nahi mila</b><small>Search ya filter badal ke dekho.</small></div>`;
+    return;
+  }
+  $('gList').innerHTML = rows.map(x => `
+    <div class="swipe" data-id="${x.id}">
+      <div class="grow-item" data-a="open" role="button" tabindex="0" aria-label="${esc(x.name)} edit karo">
+        <div class="avatar">${esc(x.name.trim()[0] || '?')}</div>
+        <div class="gmeta">
+          <b>${esc(x.name)}</b>
+          <small>👨‍👩‍👧 ${x.count} ${x.count === 1 ? 'member' : 'members'} · ${SIDE_ONLY} side</small>
+        </div>
+        <button class="chip ${x.status}" data-a="status" aria-label="Status badlo">${x.status}</button>
+        <span class="chev">›</span>
+      </div>
+    </div>`).join('');
+}
+
+// One delegated click handler: status chip cycles, row opens the dialog
+$('gList').addEventListener('click', (e) => {
+  const sw = e.target.closest('.swipe'); if (!sw) return;
+  const x = S.guests.find(v => v.id === sw.dataset.id); if (!x) return;
+  const chip = e.target.closest('[data-a="status"]');
+  if (chip) {
+    x.status = STATUSES[(STATUSES.indexOf(x.status) + 1) % STATUSES.length];
+    save(); renderGuests();
+    return;
+  }
+  if (e.target.closest('[data-a="open"]')) openDialog(x.id);
+});
+// Keyboard access: Enter on a row opens the dialog
+$('gList').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.matches('[data-a="open"]')) openDialog(e.target.closest('.swipe').dataset.id);
+});
+
+function deleteGuest(id){
+  const i = S.guests.findIndex(v => v.id === id); if (i < 0) return;
+  const [removed] = S.guests.splice(i, 1);
+  save(); renderGuests();
+  toast(`"${removed.name}" hata diya`, () => { S.guests.splice(i, 0, removed); save(); renderGuests(); });
+}
+
+/* Swipe-left to delete (touch). Dragging past 90px deletes. */
+(function swipe(){
+  let card = null, sx = 0, sy = 0, dx = 0, locked = false;
+  const list = $('gList');
+  list.addEventListener('touchstart', (e) => {
+    if (e.target.closest('button,input')) return;
+    card = e.target.closest('.grow-item'); if (!card) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; dx = 0; locked = false;
+  }, {passive:true});
+  list.addEventListener('touchmove', (e) => {
+    if (!card) return;
+    const mx = e.touches[0].clientX - sx, my = e.touches[0].clientY - sy;
+    if (!locked && Math.abs(my) > Math.abs(mx)) { card = null; return; }   // vertical scroll wins
+    locked = true; dx = Math.min(0, mx);
+    card.classList.add('dragging'); card.style.transform = `translateX(${dx}px)`;
+  }, {passive:true});
+  list.addEventListener('touchend', () => {
+    if (!card) return;
+    card.classList.remove('dragging');
+    if (dx < -90) deleteGuest(card.closest('.swipe').dataset.id); else card.style.transform = '';
+    card = null;
+  });
+})();
+
+/* ---------- Guest edit bottom-sheet dialog ---------- */
+let dlgId = null, dlgCount = 1, dlgStatus = 'Invited';
+
+function openDialog(id){
+  const x = S.guests.find(v => v.id === id); if (!x) return;
+  dlgId = id; dlgCount = x.count; dlgStatus = x.status;
+  $('dName').value = x.name;
+  syncDialog();
+  $('dlg').classList.add('open');
+  setTimeout(() => { $('dName').focus(); $('dName').select(); }, 120);
+}
+function closeDialog(){ $('dlg').classList.remove('open'); dlgId = null; }
+function syncDialog(){
+  $('dCount').textContent = dlgCount;
+  $('dCountLabel').textContent = `${dlgCount} ${dlgCount === 1 ? 'member' : 'members'}`;
+  $('dSeg').querySelectorAll('button').forEach(b => b.className = b.dataset.st === dlgStatus ? 'on ' + dlgStatus : '');
+}
+$('dMinus').onclick = () => { dlgCount = clamp(dlgCount - 1); syncDialog(); };
+$('dPlus').onclick  = () => { dlgCount = clamp(dlgCount + 1); syncDialog(); };
+$('dSeg').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  dlgStatus = b.dataset.st; syncDialog();
+});
+$('dSave').onclick = () => {
+  const x = S.guests.find(v => v.id === dlgId); if (!x) return closeDialog();
+  const name = $('dName').value.trim();
+  if (!name) { $('dName').focus(); return; }
+  x.name = name; x.count = dlgCount; x.status = dlgStatus;
+  save(); closeDialog(); renderGuests();
+  toast('Guest update ho gaya');
+};
+$('dDelete').onclick = () => { const id = dlgId; closeDialog(); deleteGuest(id); };
+$('dCancel').onclick = closeDialog;
+$('dlg').addEventListener('click', (e) => { if (e.target === $('dlg')) closeDialog(); });   // tap outside
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && $('dlg').classList.contains('open')) closeDialog();
+  if (e.key === 'Enter' && e.target === $('dName')) $('dSave').click();
+});
+
+/* ---------- Export guest list as CSV ---------- */
+$('exportBtn').onclick = () => {
+  const mine = S.guests.filter(x => x.side === SIDE_ONLY);
+  if (!mine.length) { toast('Pehle kuch guests add karo'); return; }
+  const cell = (v) => '"' + String(v).replace(/"/g, '""') + '"';
+  const lines = [['Name','Family count','Side','Status'].map(cell).join(',')]
+    .concat(mine.map(x => [x.name, x.count, x.side, x.status].map(cell).join(',')));
+  const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type:'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'guest-list.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+/* =====================================================
+   BUDGET
+   ===================================================== */
+let editingExp = null, formStatus = 'Pending';
+$('eCat').innerHTML = CATEGORIES.map(c => `<option>${c}</option>`).join('');
+
+// Amount inputs format live with Indian commas
+$('eAmt').addEventListener('input', (e) => { const n = num(e.target.value); e.target.value = n ? inr.format(n) : ''; });
+
+function setFormStatus(v){
+  formStatus = v;
+  $('eStatus').querySelectorAll('button').forEach(b => { b.className = b.dataset.v === v ? 'on ' + v : ''; });
+}
+$('eStatus').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) setFormStatus(b.dataset.v); });
+setFormStatus('Pending');
+
+function resetExpForm(){
+  editingExp = null;
+  $('eName').value = ''; $('eAmt').value = ''; $('eCat').value = CATEGORIES[0];
+  setFormStatus('Pending');
+  $('expTitle').textContent = 'Naya Expense';
+  $('eSubmit').textContent = '+ Add Expense';
+  $('eCancel').style.display = 'none';
+}
+$('eCancel').onclick = resetExpForm;
+
+$('expForm').onsubmit = (e) => {
+  e.preventDefault();
+  const name = $('eName').value.trim(), amount = num($('eAmt').value);
+  if (!name) { $('eName').focus(); return; }
+  if (!amount) { $('eAmt').focus(); return; }
+  const data = { name, category: $('eCat').value, amount, status: formStatus };
+  if (editingExp) Object.assign(S.expenses.find(x => x.id === editingExp) || {}, data);
+  else S.expenses.unshift({ id: uid(), ...data });
+  save(); resetExpForm(); renderBudget();
+  $('eName').focus();
+};
+
+$('ePills').addEventListener('click', (e) => {
+  const b = e.target.closest('.pill-btn'); if (!b) return;
+  $('ePills').querySelectorAll('.pill-btn').forEach(p => p.classList.toggle('on', p === b));
+  renderExpenses();
+});
+const eFilter = () => $('ePills').querySelector('.pill-btn.on').dataset.v;
+
+/* Hero summary card with inline budget editor */
+function renderHero(){
+  const spent = S.expenses.reduce((a, x) => a + x.amount, 0);
+  const paid = S.expenses.filter(x => x.status === 'Paid').reduce((a, x) => a + x.amount, 0);
+  const remaining = S.budget - spent;
+  const pct = S.budget ? Math.min(100, spent / S.budget * 100) : (spent ? 100 : 0);
+  const over = remaining < 0;
+  $('bHero').innerHTML =
+    `<div class="top">
+       <div>
+         <small>Remaining</small>
+         <div class="big ${over ? 'neg' : ''}">${over ? '−' : ''}${money(Math.abs(remaining))}</div>
+       </div>
+       <div class="budget-set">
+         <input id="bTotal" inputmode="numeric" placeholder="Budget ₹" value="${S.budget ? inr.format(S.budget) : ''}" aria-label="Total budget">
+       </div>
+     </div>
+     <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><i class="${over ? 'over' : ''}" style="width:${pct}%"></i></div>
+     <p class="cap">${S.budget ? Math.round(spent / S.budget * 100) + '% budget use hua' : 'Upar total budget set karo'}</p>
+     <div class="cols">
+       <div><small>Budget</small><b>${money(S.budget)}</b></div>
+       <div><small>Spent</small><b>${money(spent)}</b></div>
+       <div><small>Paid</small><b>${money(paid)}</b></div>
+       <div><small>Pending</small><b>${money(spent - paid)}</b></div>
+     </div>`;
+  $('bTotal').addEventListener('input', (e) => {
+    S.budget = num(e.target.value); save();
+    const pos = e.target.selectionStart;
+    e.target.value = S.budget ? inr.format(S.budget) : '';
+    e.target.setSelectionRange(pos, pos);
+    refreshHeroNumbers();
+  });
+}
+/* Update hero numbers without rebuilding the input you're typing in */
+function refreshHeroNumbers(){
+  const spent = S.expenses.reduce((a, x) => a + x.amount, 0);
+  const remaining = S.budget - spent;
+  const over = remaining < 0;
+  const big = $('bHero').querySelector('.big');
+  big.textContent = (over ? '−' : '') + money(Math.abs(remaining));
+  big.classList.toggle('neg', over);
+  const pct = S.budget ? Math.min(100, spent / S.budget * 100) : (spent ? 100 : 0);
+  const bar = $('bHero').querySelector('.bar i');
+  bar.style.width = pct + '%'; bar.classList.toggle('over', over);
+  $('bHero').querySelector('.cap').textContent = S.budget ? Math.round(spent / S.budget * 100) + '% budget use hua' : 'Upar total budget set karo';
+  const cols = $('bHero').querySelectorAll('.cols b');
+  cols[0].textContent = money(S.budget);
+}
+
+function renderCategories(){
+  const totals = {};
+  S.expenses.forEach(x => totals[x.category] = (totals[x.category] || 0) + x.amount);
+  const rows = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+  const max = rows.length ? rows[0][1] : 1;
+  $('bCats').innerHTML = `<h3 class="h2">Category-wise</h3>` + (rows.length
+    ? rows.map(([c, t]) => `
+      <div class="cat-row">
+        <span style="white-space:nowrap">${CAT_ICONS[c] || '📦'} ${esc(c)}</span>
+        <span class="cb"><i style="width:${Math.round(t / max * 100)}%"></i></span>
+        <span>${money(t)}</span>
+      </div>`).join('')
+    : `<div style="color:var(--muted);font-size:14px">Abhi koi expense nahi.</div>`);
+}
+
+function renderExpenses(){
+  const f = eFilter();
+  const rows = S.expenses.filter(x => !f || x.status === f);
+  if (!S.expenses.length) {
+    $('eList').innerHTML = `<div class="empty"><span class="em">🪔</span><b>Pehla expense add karo</b><small>Upar form bhar ke shuru karo.</small></div>`;
+    return;
+  }
+  if (!rows.length) { $('eList').innerHTML = `<div class="empty"><b>Is filter me kuch nahi</b></div>`; return; }
+  $('eList').innerHTML = rows.map(x => `
+    <div class="erow" data-id="${x.id}">
+      <div class="eic">${CAT_ICONS[x.category] || '📦'}</div>
+      <div class="emeta">
+        <b>${esc(x.name)}</b>
+        <small><span class="dot ${x.status}"></span>${x.status} · ${esc(x.category)}</small>
+      </div>
+      <div class="eamt">${money(x.amount)}</div>
+      <div class="eactions">
+        <button class="icon-btn" data-a="edit" aria-label="Edit">✏️</button>
+        <button class="icon-btn" data-a="del" aria-label="Delete">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+$('eList').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-a]'); if (!btn) return;
+  const id = btn.closest('.erow').dataset.id;
+  const i = S.expenses.findIndex(v => v.id === id); if (i < 0) return;
+  const x = S.expenses[i];
+  if (btn.dataset.a === 'edit') {
+    editingExp = id;
+    $('eName').value = x.name; $('eCat').value = x.category; $('eAmt').value = inr.format(x.amount);
+    setFormStatus(x.status);
+    $('expTitle').textContent = 'Expense Edit Karo';
+    $('eSubmit').textContent = 'Update Expense';
+    $('eCancel').style.display = '';
+    $('expForm').scrollIntoView({ behavior:'smooth', block:'center' });
+    $('eName').focus();
+  }
+  if (btn.dataset.a === 'del') {
+    S.expenses.splice(i, 1);
+    if (editingExp === id) resetExpForm();
+    save(); renderBudget();
+    toast(`"${x.name}" hata diya`, () => { S.expenses.splice(i, 0, x); save(); renderBudget(); });
+  }
+});
+
+function renderBudget(){ renderHero(); renderCategories(); renderExpenses(); }
+
+/* ---------- Boot ---------- */
+applyTheme();
+renderGuests();
+renderBudget();
+showTab(S.tab === 'budget' ? 'budget' : 'guests');
+</script>
+</body>
+</html>
