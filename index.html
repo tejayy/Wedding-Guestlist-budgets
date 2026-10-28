@@ -227,6 +227,68 @@ nav button .ic{font-size:21px;transition:transform .15s}
 nav button.active{color:var(--accent)}
 nav button.active .ic{transform:translateY(-2px) scale(1.18)}
 nav button.active::before{content:"";position:absolute;top:6px;width:32px;height:5px;border-radius:3px;background:linear-gradient(90deg,var(--a1),var(--a2));box-shadow:var(--clay-sm)}
+
+/* ================= Responsive layouts ================= */
+@media (min-width: 700px){
+  body{overflow:auto;min-height:100vh;padding:28px 24px}
+  #app{width:min(100%,1180px);max-width:none;height:auto;min-height:calc(100vh - 56px);margin:0 auto;border-radius:30px;overflow:hidden;
+    background:color-mix(in srgb,var(--card-2) 45%,transparent);box-shadow:0 24px 70px rgba(54,37,92,.18)}
+  header{padding:24px 34px;border-radius:0;box-shadow:0 10px 24px rgba(44,29,78,.25)}
+  header h1{font-size:23px}
+  header .sub{font-size:13px}
+  .hbtns{gap:10px}
+  main{order:2;width:100%;padding:26px 34px 38px;overflow:visible;}
+  section{max-width:1060px;margin:0 auto}
+  nav{order:1;grid-template-columns:repeat(2,minmax(140px,190px));justify-content:center;padding:8px 24px 10px;border-bottom:1px solid var(--line);box-shadow:0 4px 14px rgba(54,37,92,.08)}
+  nav button{min-height:56px;flex-direction:row;font-size:13px;gap:10px}
+  nav button .ic{font-size:20px}
+  nav button.active .ic{transform:scale(1.08)}
+  nav button.active::before{top:auto;bottom:0;width:54px;height:4px}
+  .summary{gap:16px;padding:0 0 4px!important}
+  .stat{padding:18px}
+  .stat b{font-size:26px}
+  .stat small{font-size:11px}
+  .filters{padding:20px 0 8px;grid-template-columns:minmax(240px,1fr) auto;align-items:center}
+  .filters input{max-width:420px}
+  .pills{justify-content:flex-end}
+  .list{padding:16px 0;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:16px}
+  .grow-item{min-height:78px;padding:14px 16px}
+  .hero{margin:0;padding:26px 30px}
+  .hero .big{font-size:36px}
+  .box{margin:0;padding:22px}
+  #tab-budget{display:none;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:20px;align-items:start}
+  #tab-budget.active{display:grid}
+  #bHero{grid-column:1/-1}
+  #bCats{grid-column:1}
+  #expForm{grid-column:2;grid-row:2 / span 2}
+  #tab-budget>.pad,#eList{grid-column:1/-1}
+  #eList{padding:0;grid-template-columns:repeat(2,minmax(0,1fr))}
+  #tab-budget>.pad{padding:2px 0 0}
+  #tab-budget>.pad .pills{justify-content:flex-start}
+  .fab{position:fixed;right:max(34px,calc((100vw - 1180px)/2 + 34px));bottom:34px}
+  #toast{position:fixed;left:50%;right:auto;bottom:38px;transform:translateX(-50%);width:min(420px,calc(100vw - 40px))}
+  .overlay{align-items:center;padding:24px}
+  .sheet{max-width:520px;border-radius:30px;padding:18px 24px 24px}
+  .grab{display:none}
+}
+@media (min-width: 1100px){
+  main{padding-left:48px;padding-right:48px}
+  section{max-width:1100px}
+  #tab-budget{grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:24px}
+  .list{gap:18px}
+}
+@media (max-width: 380px){
+  header{padding-left:14px;padding-right:14px}
+  .hbtns{gap:6px}
+  .hbtns .icon-btn{min-width:38px;min-height:38px}
+  .summary{gap:7px;padding-left:10px;padding-right:10px}
+  .stat{padding:12px 5px}
+  .stat b{font-size:19px}
+  .filters,.list{padding-left:10px;padding-right:10px}
+  .grow-item{gap:8px;padding:10px}
+  .chip{padding:0 10px;font-size:11px}
+  .chev{display:none}
+}
 </style>
 </head>
 <body>
